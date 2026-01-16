@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: #f0f2f5;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-header h2 {
+    font-size: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.stat-card .value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #409eff;
+}
+
+.stat-card .label {
+    color: #909399;
+    font-size: 14px;
+    margin-top: 8px;
+}

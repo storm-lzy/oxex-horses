@@ -1,0 +1,28 @@
+{
+  "name": "niuma-house-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "pinia": "^3.0.2",
+    "axios": "^1.7.9",
+    "element-plus": "^2.10.3",
+    "@element-plus/icons-vue": "^2.3.1",
+    "md-editor-v3": "^5.5.1",
+    "highlight.js": "^11.11.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.8",
+    "sass": "^1.88.0"
+  }
+}

@@ -1,0 +1,7 @@
+p, super_admin, /admin/*, *
+p, super_admin, /api/*, *
+p, content_admin, /admin/posts/*, *
+p, content_admin, /admin/companies/*, *
+p, content_admin, /admin/comments/*, *
+
+g, admin, super_admin
