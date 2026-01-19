@@ -25,6 +25,12 @@ services:
       - rabbitmq
       - minio
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   # 前端管理后台
   niuma-web-admin:
@@ -39,6 +45,10 @@ services:
     depends_on:
       - niuma-server
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
   # 前端客户端
   niuma-web-client:
@@ -53,6 +63,10 @@ services:
     depends_on:
       - niuma-server
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
   # Redis - 加入 my-rpg-net
   redis:
@@ -63,6 +77,10 @@ services:
     networks:
       - my-rpg-net
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
   # RabbitMQ - 加入 my-rpg-net
   rabbitmq:
@@ -77,6 +95,10 @@ services:
     networks:
       - my-rpg-net
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   # MinIO - 加入 my-rpg-net
   minio:
@@ -94,6 +116,10 @@ services:
     networks:
       - my-rpg-net
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
 volumes:
   minio_data:
