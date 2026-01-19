@@ -1,10 +1,17 @@
 # 构建阶段
-FROM golang:1.25.6-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /build
 
+# 配置 Alpine 国内镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # 安装必要的构建工具
 RUN apk add --no-cache git ca-certificates tzdata
+
+# 配置 Go 国内代理
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GO111MODULE=on
 
 # 复制 go.mod 和 go.sum
 COPY go.mod go.sum ./
@@ -22,6 +29,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o server ./
 FROM alpine:latest
 
 WORKDIR /app
+
+# 配置 Alpine 国内镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 安装必要的运行时依赖
 RUN apk add --no-cache ca-certificates tzdata
