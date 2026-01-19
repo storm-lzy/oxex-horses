@@ -1,5 +1,5 @@
-# 构建阶段
-FROM golang:1.23-alpine AS builder
+# 构建阶段 - 使用最新的 Go 镜像
+FROM golang:alpine AS builder
 
 WORKDIR /build
 
@@ -9,9 +9,10 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 # 安装必要的构建工具
 RUN apk add --no-cache git ca-certificates tzdata
 
-# 配置 Go 国内代理
+# 配置 Go 国内代理，并允许自动下载工具链
 ENV GOPROXY=https://goproxy.cn,direct
 ENV GO111MODULE=on
+ENV GOTOOLCHAIN=auto
 
 # 复制 go.mod 和 go.sum
 COPY go.mod go.sum ./
