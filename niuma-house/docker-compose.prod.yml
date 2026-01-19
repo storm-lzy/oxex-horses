@@ -1,8 +1,8 @@
 version: '3.8'
 
-# 使用外部网络 dockernet，需要先创建: docker network create dockernet
+# 使用外部网络 my-rpg-net，需要先创建: docker network create my-rpg-net
 networks:
-  dockernet:
+  my-rpg-net:
     external: true
 
 services:
@@ -19,7 +19,7 @@ services:
       - ./config/rbac_model.conf:/app/config/rbac_model.conf:ro
       - ./config/rbac_policy.csv:/app/config/rbac_policy.csv:ro
     networks:
-      - dockernet
+      - my-rpg-net
     depends_on:
       - redis
       - rabbitmq
@@ -35,7 +35,7 @@ services:
     ports:
       - "80:80"
     networks:
-      - dockernet
+      - my-rpg-net
     depends_on:
       - niuma-server
     restart: unless-stopped
@@ -49,22 +49,22 @@ services:
     ports:
       - "81:80"
     networks:
-      - dockernet
+      - my-rpg-net
     depends_on:
       - niuma-server
     restart: unless-stopped
 
-  # Redis - 加入 dockernet
+  # Redis - 加入 my-rpg-net
   redis:
     image: redis:7-alpine
     container_name: niuma-redis
     ports:
       - "6379:6379"
     networks:
-      - dockernet
+      - my-rpg-net
     restart: unless-stopped
 
-  # RabbitMQ - 加入 dockernet
+  # RabbitMQ - 加入 my-rpg-net
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: niuma-rabbitmq
@@ -75,10 +75,10 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     networks:
-      - dockernet
+      - my-rpg-net
     restart: unless-stopped
 
-  # MinIO - 加入 dockernet
+  # MinIO - 加入 my-rpg-net
   minio:
     image: minio/minio:latest
     container_name: niuma-minio
@@ -92,7 +92,7 @@ services:
     volumes:
       - minio_data:/data
     networks:
-      - dockernet
+      - my-rpg-net
     restart: unless-stopped
 
 volumes:
