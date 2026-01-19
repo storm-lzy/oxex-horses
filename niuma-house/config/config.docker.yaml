@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  mode: release  # debug, release
+
+mysql:
+  host: mysql8  # 使用你现有的MySQL容器名称
+  port: 3306
+  username: root
+  password: 123456
+  database: niuma_house
+  charset: utf8mb4
+  max_idle_conns: 10
+  max_open_conns: 100
+
+redis:
+  host: niuma-redis  # Redis容器名称
+  port: 6379
+  password: ""
+  db: 0
+
+minio:
+  endpoint: niuma-minio:9000  # MinIO容器名称
+  access_key: minioadmin
+  secret_key: minioadmin
+  bucket: niuma-house
+  use_ssl: false
+
+rabbitmq:
+  host: niuma-rabbitmq  # RabbitMQ容器名称
+  port: 5672
+  username: guest
+  password: guest
+  vhost: /
+
+jwt:
+  secret: niuma-house-jwt-secret-key-2026
+  expire_hours: 72
+
+casbin:
+  model_path: ./config/rbac_model.conf
+  policy_path: ./config/rbac_policy.csv

@@ -1,0 +1,99 @@
+version: '3.8'
+
+# 使用外部网络 dockernet，需要先创建: docker network create dockernet
+networks:
+  dockernet:
+    external: true
+
+services:
+  # 后端服务
+  niuma-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: niuma-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/config.docker.yaml:/app/config/config.yaml:ro
+      - ./config/rbac_model.conf:/app/config/rbac_model.conf:ro
+      - ./config/rbac_policy.csv:/app/config/rbac_policy.csv:ro
+    networks:
+      - dockernet
+    depends_on:
+      - redis
+      - rabbitmq
+      - minio
+    restart: unless-stopped
+
+  # 前端管理后台
+  niuma-web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    container_name: niuma-web-admin
+    ports:
+      - "80:80"
+    networks:
+      - dockernet
+    depends_on:
+      - niuma-server
+    restart: unless-stopped
+
+  # 前端客户端
+  niuma-web-client:
+    build:
+      context: ./web-client
+      dockerfile: Dockerfile
+    container_name: niuma-web-client
+    ports:
+      - "81:80"
+    networks:
+      - dockernet
+    depends_on:
+      - niuma-server
+    restart: unless-stopped
+
+  # Redis - 加入 dockernet
+  redis:
+    image: redis:7-alpine
+    container_name: niuma-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - dockernet
+    restart: unless-stopped
+
+  # RabbitMQ - 加入 dockernet
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: niuma-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - dockernet
+    restart: unless-stopped
+
+  # MinIO - 加入 dockernet
+  minio:
+    image: minio/minio:latest
+    container_name: niuma-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - dockernet
+    restart: unless-stopped
+
+volumes:
+  minio_data:
