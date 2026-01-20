@@ -23,7 +23,45 @@ func GetMessages(c *gin.Context) {
 			response.Fail(c, response.CodeServerError, "获取会话列表失败")
 			return
 		}
-		response.Success(c, conversations)
+
+		// 转换为前端期望的格式
+		type ConversationItem struct {
+			User struct {
+				ID       uint   `json:"id"`
+				Username string `json:"username"`
+				Level    int    `json:"level"`
+			} `json:"user"`
+			LastMessage  interface{} `json:"last_message"`
+			UnreadCount  int64       `json:"unread_count"`
+		}
+
+		var list []ConversationItem
+		for _, msg := range conversations {
+			var item ConversationItem
+
+			// 确定对方用户
+			if msg.SenderID == userID {
+				item.User.ID = msg.ReceiverID
+				if msg.Receiver != nil {
+					item.User.Username = msg.Receiver.Username
+					item.User.Level = msg.Receiver.Level
+				}
+			} else {
+				item.User.ID = msg.SenderID
+				if msg.Sender != nil {
+					item.User.Username = msg.Sender.Username
+					item.User.Level = msg.Sender.Level
+				}
+			}
+
+			item.LastMessage = msg
+			// 统计与该用户的未读消息数
+			item.UnreadCount = GetMessageService().GetUnreadCountFrom(userID, item.User.ID)
+
+			list = append(list, item)
+		}
+
+		response.Success(c, gin.H{"list": list})
 		return
 	}
 

@@ -52,3 +52,8 @@ func (s *MessageService) MarkAsRead(receiverID, senderID uint) error {
 func (s *MessageService) GetUnreadCount(userID uint) int64 {
 	return s.messageRepo.CountUnread(userID)
 }
+
+// GetUnreadCountFrom 获取来自特定用户的未读消息数
+func (s *MessageService) GetUnreadCountFrom(receiverID, senderID uint) int64 {
+	return s.messageRepo.CountUnreadFrom(receiverID, senderID)
+}

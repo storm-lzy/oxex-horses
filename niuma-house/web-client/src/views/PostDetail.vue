@@ -100,6 +100,15 @@ const formatDate = (date: string) => {
               </span>
               <span class="post-meta">{{ post.occupation?.name }} · {{ formatDate(post.created_at) }}</span>
             </div>
+            <el-button
+              v-if="userStore.isLoggedIn && post.user?.id !== userStore.user?.id"
+              type="primary"
+              size="small"
+              @click="router.push({ path: '/messages', query: { userId: post.user?.id, username: post.user?.username } })"
+            >
+              <el-icon><ChatDotRound /></el-icon>
+              私信
+            </el-button>
           </div>
         </div>
 

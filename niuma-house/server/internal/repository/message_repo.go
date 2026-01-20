@@ -80,3 +80,12 @@ func (r *MessageRepository) CountUnread(userID uint) int64 {
 		Count(&count)
 	return count
 }
+
+// CountUnreadFrom 统计来自特定用户的未读消息数
+func (r *MessageRepository) CountUnreadFrom(receiverID, senderID uint) int64 {
+	var count int64
+	r.db.Model(&model.Message{}).
+		Where("receiver_id = ? AND sender_id = ? AND is_read = false", receiverID, senderID).
+		Count(&count)
+	return count
+}
