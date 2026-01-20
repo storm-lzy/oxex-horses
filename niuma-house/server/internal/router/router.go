@@ -82,7 +82,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	}
 
 	// 管理后台 API
-	admin := r.Group("/admin")
+	admin := r.Group("/api/admin")
 	admin.Use(middleware.JWTAuth(), middleware.AdminAuth())
 	{
 		// 数据统计
