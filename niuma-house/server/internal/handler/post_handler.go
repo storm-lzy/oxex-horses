@@ -10,15 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var postService = service.NewPostService()
-
 // GetPosts 获取帖子列表
 func GetPosts(c *gin.Context) {
 	occupationID, _ := strconv.ParseUint(c.Query("occupation_id"), 10, 64)
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	posts, total, err := postService.List(uint(occupationID), page, size)
+	posts, total, err := GetPostService().List(uint(occupationID), page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取帖子列表失败")
 		return
@@ -37,7 +35,7 @@ func GetPost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	post, isLiked, isFavorited, err := postService.GetByID(uint(id), userID)
+	post, isLiked, isFavorited, err := GetPostService().GetByID(uint(id), userID)
 	if err != nil {
 		response.Fail(c, response.CodeNotFound, "帖子不存在")
 		return
@@ -59,7 +57,7 @@ func CreatePost(c *gin.Context) {
 	}
 
 	userID := middleware.GetCurrentUserID(c)
-	post, err := postService.Create(userID, &req)
+	post, err := GetPostService().Create(userID, &req)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
@@ -79,7 +77,7 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	if err := postService.Update(uint(id), userID, &req); err != nil {
+	if err := GetPostService().Update(uint(id), userID, &req); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -92,7 +90,7 @@ func DeletePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := postService.Delete(uint(id), userID); err != nil {
+	if err := GetPostService().Delete(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -105,7 +103,7 @@ func LikePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := postService.Like(uint(id), userID); err != nil {
+	if err := GetPostService().Like(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -118,7 +116,7 @@ func UnlikePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := postService.Unlike(uint(id), userID); err != nil {
+	if err := GetPostService().Unlike(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -131,7 +129,7 @@ func FavoritePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := postService.Favorite(uint(id), userID); err != nil {
+	if err := GetPostService().Favorite(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -144,7 +142,7 @@ func UnfavoritePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := postService.Unfavorite(uint(id), userID); err != nil {
+	if err := GetPostService().Unfavorite(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -157,7 +155,7 @@ func AdminGetPosts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	posts, total, err := postService.AdminList(page, size)
+	posts, total, err := GetPostService().AdminList(page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取帖子列表失败")
 		return
@@ -174,7 +172,7 @@ func AdminGetPosts(c *gin.Context) {
 // AdminDeletePost 管理员删除帖子
 func AdminDeletePost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := postService.AdminDelete(uint(id)); err != nil {
+	if err := GetPostService().AdminDelete(uint(id)); err != nil {
 		response.Fail(c, response.CodeServerError, "删除失败")
 		return
 	}
@@ -184,7 +182,7 @@ func AdminDeletePost(c *gin.Context) {
 // TopPost 置顶帖子
 func TopPost(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := postService.SetTop(uint(id)); err != nil {
+	if err := GetPostService().SetTop(uint(id)); err != nil {
 		response.Fail(c, response.CodeServerError, "置顶失败")
 		return
 	}

@@ -10,15 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var commentService = service.NewCommentService()
-
 // GetComments 获取评论列表
 func GetComments(c *gin.Context) {
 	postID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	comments, total, err := commentService.List(uint(postID), page, size)
+	comments, total, err := GetCommentService().List(uint(postID), page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取评论列表失败")
 		return
@@ -43,7 +41,7 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := commentService.Create(uint(postID), userID, &req)
+	comment, err := GetCommentService().Create(uint(postID), userID, &req)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
@@ -57,7 +55,7 @@ func DeleteComment(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	userID := middleware.GetCurrentUserID(c)
 
-	if err := commentService.Delete(uint(id), userID); err != nil {
+	if err := GetCommentService().Delete(uint(id), userID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}

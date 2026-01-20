@@ -4,13 +4,10 @@ import (
 	"strconv"
 
 	"niuma-house/internal/middleware"
-	"niuma-house/internal/service"
 	"niuma-house/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
-
-var messageService = service.NewMessageService()
 
 // GetMessages 获取消息列表
 func GetMessages(c *gin.Context) {
@@ -21,7 +18,7 @@ func GetMessages(c *gin.Context) {
 
 	if otherUserID == 0 {
 		// 获取会话列表
-		conversations, err := messageService.GetConversations(userID)
+		conversations, err := GetMessageService().GetConversations(userID)
 		if err != nil {
 			response.Fail(c, response.CodeServerError, "获取会话列表失败")
 			return
@@ -31,7 +28,7 @@ func GetMessages(c *gin.Context) {
 	}
 
 	// 获取与某用户的消息
-	messages, total, err := messageService.GetMessages(userID, uint(otherUserID), page, size)
+	messages, total, err := GetMessageService().GetMessages(userID, uint(otherUserID), page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取消息列表失败")
 		return
@@ -48,7 +45,7 @@ func GetMessages(c *gin.Context) {
 // GetUnreadCount 获取未读消息数
 func GetUnreadCount(c *gin.Context) {
 	userID := middleware.GetCurrentUserID(c)
-	count := messageService.GetUnreadCount(userID)
+	count := GetMessageService().GetUnreadCount(userID)
 	response.Success(c, gin.H{"count": count})
 }
 
@@ -64,7 +61,7 @@ func MarkAsRead(c *gin.Context) {
 		return
 	}
 
-	if err := messageService.MarkAsRead(userID, req.SenderID); err != nil {
+	if err := GetMessageService().MarkAsRead(userID, req.SenderID); err != nil {
 		response.Fail(c, response.CodeServerError, "操作失败")
 		return
 	}

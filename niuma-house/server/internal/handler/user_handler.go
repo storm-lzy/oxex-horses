@@ -11,8 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var userService = service.NewUserService()
-
 // Register 用户注册
 func Register(c *gin.Context) {
 	var req service.RegisterRequest
@@ -21,7 +19,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user, err := userService.Register(&req)
+	user, err := GetUserService().Register(&req)
 	if err != nil {
 		response.Fail(c, response.CodeUserExists, err.Error())
 		return
@@ -38,7 +36,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	resp, err := userService.Login(&req)
+	resp, err := GetUserService().Login(&req)
 	if err != nil {
 		response.Fail(c, response.CodeWrongPassword, err.Error())
 		return
@@ -50,7 +48,7 @@ func Login(c *gin.Context) {
 // GetProfile 获取用户资料
 func GetProfile(c *gin.Context) {
 	userID := middleware.GetCurrentUserID(c)
-	user, err := userService.GetProfile(userID)
+	user, err := GetUserService().GetProfile(userID)
 	if err != nil {
 		response.Fail(c, response.CodeNotFound, "用户不存在")
 		return
@@ -71,7 +69,7 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	if err := userService.UpdateProfile(userID, req.OccupationID); err != nil {
+	if err := GetUserService().UpdateProfile(userID, req.OccupationID); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}
@@ -94,7 +92,7 @@ func AdminGetUsers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	users, total, err := userService.List(page, size)
+	users, total, err := GetUserService().List(page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取用户列表失败")
 		return
@@ -111,7 +109,7 @@ func AdminGetUsers(c *gin.Context) {
 // BanUser 封禁用户
 func BanUser(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := userService.Ban(uint(id)); err != nil {
+	if err := GetUserService().Ban(uint(id)); err != nil {
 		response.Fail(c, response.CodeServerError, "封禁失败")
 		return
 	}
@@ -121,7 +119,7 @@ func BanUser(c *gin.Context) {
 // UnbanUser 解封用户
 func UnbanUser(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := userService.Unban(uint(id)); err != nil {
+	if err := GetUserService().Unban(uint(id)); err != nil {
 		response.Fail(c, response.CodeServerError, "解封失败")
 		return
 	}

@@ -10,14 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var companyService = service.NewCompanyService()
-
 // GetCompanies 获取公司列表
 func GetCompanies(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	companies, total, err := companyService.List(page, size)
+	companies, total, err := GetCompanyService().List(page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取公司列表失败")
 		return
@@ -37,7 +35,7 @@ func SearchCompanies(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	companies, total, err := companyService.Search(c.Request.Context(), keyword, page, size)
+	companies, total, err := GetCompanyService().Search(c.Request.Context(), keyword, page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "搜索失败")
 		return
@@ -56,7 +54,7 @@ func SearchCompanies(c *gin.Context) {
 func GetCompany(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 
-	company, err := companyService.GetByID(uint(id))
+	company, err := GetCompanyService().GetByID(uint(id))
 	if err != nil {
 		response.Fail(c, response.CodeNotFound, "公司不存在")
 		return
@@ -74,7 +72,7 @@ func CreateCompany(c *gin.Context) {
 	}
 
 	userID := middleware.GetCurrentUserID(c)
-	company, err := companyService.Create(userID, &req)
+	company, err := GetCompanyService().Create(userID, &req)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
@@ -88,7 +86,7 @@ func AdminGetCompanies(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	companies, total, err := companyService.AdminList(page, size)
+	companies, total, err := GetCompanyService().AdminList(page, size)
 	if err != nil {
 		response.Fail(c, response.CodeServerError, "获取公司列表失败")
 		return
@@ -105,7 +103,7 @@ func AdminGetCompanies(c *gin.Context) {
 // AdminDeleteCompany 管理员删除公司
 func AdminDeleteCompany(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := companyService.AdminDelete(uint(id)); err != nil {
+	if err := GetCompanyService().AdminDelete(uint(id)); err != nil {
 		response.Fail(c, response.CodeServerError, "删除失败")
 		return
 	}
