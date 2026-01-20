@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPost, likePost, unlikePost, favoritePost, unfavoritePost, getComments, createComment, type Post } from '@/api/post'
-import type { User } from '@/api/user'
+
 import { useUserStore } from '@/stores/user'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
