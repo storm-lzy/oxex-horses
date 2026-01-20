@@ -3,9 +3,9 @@ server:
   mode: release  # debug, release
 
 mysql:
-  host: mysql8  # 使用你现有的MySQL容器名称
+  host: 8.148.183.224  # 使用你现有的MySQL容器名称
   port: 3306
-  username: root
+  username: storm
   password: 123456
   database: niuma_house
   charset: utf8mb4
