@@ -57,3 +57,58 @@ func GetPresignedURL(c *gin.Context) {
 		"object_key": objectName,
 	})
 }
+
+// UploadAvatar 获取头像上传预签名 URL
+func UploadAvatar(c *gin.Context) {
+	var req struct {
+		Filename string `json:"filename" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, response.CodeInvalidParams, "参数错误")
+		return
+	}
+
+	// 检查文件扩展名
+	ext := ""
+	if len(req.Filename) > 0 {
+		for i := len(req.Filename) - 1; i >= 0; i-- {
+			if req.Filename[i] == '.' {
+				ext = req.Filename[i:]
+				break
+			}
+		}
+	}
+
+	// 只允许图片格式
+	allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
+	if !allowedExts[ext] {
+		response.Fail(c, response.CodeInvalidParams, "只支持 jpg、png、gif、webp 格式的图片")
+		return
+	}
+
+	// 生成唯一文件名，放在 avatars 目录下
+	objectName := "avatars/" + uuid.New().String() + ext
+
+	// 生成预签名 URL (有效期 10 分钟)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	uploadURL, err := storage.GeneratePresignedPutURL(ctx, objectName, 10*time.Minute)
+	if err != nil {
+		response.Fail(c, response.CodeServerError, "生成上传链接失败")
+		return
+	}
+
+	// 生成访问 URL (有效期 7 天)
+	accessURL, err := storage.GeneratePresignedGetURL(ctx, objectName, 7*24*time.Hour)
+	if err != nil {
+		response.Fail(c, response.CodeServerError, "生成访问链接失败")
+		return
+	}
+
+	response.Success(c, gin.H{
+		"upload_url": uploadURL,
+		"access_url": accessURL,
+		"object_key": objectName,
+	})
+}

@@ -61,8 +61,10 @@ const handleCommand = (command: string) => {
             </el-button>
             <el-dropdown @command="handleCommand">
               <span class="user-info">
-                <el-avatar :size="32">{{ userStore.user?.username?.charAt(0) }}</el-avatar>
-                <span class="username">{{ userStore.user?.username }}</span>
+                <el-avatar :size="32" :src="userStore.user?.avatar || undefined">
+                  {{ (userStore.user?.nickname || userStore.user?.username)?.charAt(0) }}
+                </el-avatar>
+                <span class="username">{{ userStore.user?.nickname || userStore.user?.username }}</span>
                 <span :class="['level-badge', `level-${userStore.user?.level}`]">
                   {{ userStore.levelName }}
                 </span>

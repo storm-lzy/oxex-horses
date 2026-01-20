@@ -23,6 +23,8 @@ export interface Conversation {
   user: {
     id: number
     username: string
+    nickname: string
+    avatar: string
     level: number
   }
   last_message: Message

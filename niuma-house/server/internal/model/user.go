@@ -11,6 +11,8 @@ import (
 type User struct {
 	ID           uint           `gorm:"primaryKey" json:"id"`
 	Username     string         `gorm:"uniqueIndex;size:50;not null" json:"username"`
+	Nickname     string         `gorm:"size:50" json:"nickname"`
+	Avatar       string         `gorm:"size:255" json:"avatar"`
 	Password     string         `gorm:"size:255;not null" json:"-"`
 	OccupationID uint           `gorm:"not null" json:"occupation_id"`
 	Occupation   *Occupation    `gorm:"foreignKey:OccupationID" json:"occupation,omitempty"`

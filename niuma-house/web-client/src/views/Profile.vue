@@ -1,7 +1,19 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { updateProfile, getAvatarUploadUrl } from '@/api/user'
 
 const userStore = useUserStore()
+
+// 编辑状态
+const isEditing = ref(false)
+const editForm = ref({
+  nickname: '',
+  avatar: ''
+})
+const uploading = ref(false)
+const saving = ref(false)
 
 // 等级经验阈值
 const levelThresholds = [
@@ -26,20 +38,138 @@ const getProgress = () => {
   if (currentLevel >= 5) return 100
   return Math.min(((exp - currentThreshold) / (nextThreshold - currentThreshold)) * 100, 100)
 }
+
+// 显示名称（优先昵称，否则用户名）
+const displayName = computed(() => userStore.user?.nickname || userStore.user?.username || '')
+
+// 头像显示
+const avatarUrl = computed(() => userStore.user?.avatar || '')
+
+// 开始编辑
+const startEdit = () => {
+  editForm.value = {
+    nickname: userStore.user?.nickname || '',
+    avatar: userStore.user?.avatar || ''
+  }
+  isEditing.value = true
+}
+
+// 取消编辑
+const cancelEdit = () => {
+  isEditing.value = false
+}
+
+// 头像上传
+const handleAvatarChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  // 检查文件大小 (最大 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过 5MB')
+    return
+  }
+
+  uploading.value = true
+  try {
+    // 获取预签名 URL
+    const res = await getAvatarUploadUrl(file.name)
+    
+    // 上传到 MinIO
+    await fetch(res.upload_url, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    })
+
+    // 更新表单
+    editForm.value.avatar = res.object_key
+    ElMessage.success('头像上传成功')
+  } catch (error) {
+    console.error('上传失败:', error)
+    ElMessage.error('头像上传失败')
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 保存修改
+const saveProfile = async () => {
+  saving.value = true
+  try {
+    await updateProfile({
+      nickname: editForm.value.nickname,
+      avatar: editForm.value.avatar
+    })
+    await userStore.fetchProfile()
+    ElMessage.success('保存成功')
+    isEditing.value = false
+  } catch (error) {
+    ElMessage.error('保存失败')
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <template>
   <div class="profile-container">
     <div class="profile-card">
       <div class="profile-header">
-        <el-avatar :size="80" class="avatar">
-          {{ userStore.user?.username?.charAt(0) }}
-        </el-avatar>
+        <!-- 头像区域 -->
+        <div class="avatar-wrapper" :class="{ editing: isEditing }">
+          <el-avatar :size="80" class="avatar" :src="avatarUrl || undefined">
+            {{ displayName.charAt(0) }}
+          </el-avatar>
+          <div v-if="isEditing" class="avatar-overlay" @click="() => ($refs.avatarInput as HTMLInputElement)?.click()">
+            <el-icon v-if="!uploading"><Camera /></el-icon>
+            <el-icon v-else class="is-loading"><Loading /></el-icon>
+          </div>
+          <input
+            ref="avatarInput"
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            style="display: none"
+            @change="handleAvatarChange"
+          />
+        </div>
+
         <div class="user-info">
-          <h2>{{ userStore.user?.username }}</h2>
-          <span :class="['level-badge', `level-${userStore.user?.level}`]">
-            {{ userStore.levelName }}
-          </span>
+          <!-- 编辑模式 -->
+          <template v-if="isEditing">
+            <el-input
+              v-model="editForm.nickname"
+              placeholder="输入昵称"
+              maxlength="20"
+              show-word-limit
+              class="nickname-input"
+            />
+            <span class="username-hint">用户名: {{ userStore.user?.username }}</span>
+          </template>
+          <!-- 展示模式 -->
+          <template v-else>
+            <h2>{{ displayName }}</h2>
+            <span :class="['level-badge', `level-${userStore.user?.level}`]">
+              {{ userStore.levelName }}
+            </span>
+          </template>
+        </div>
+
+        <!-- 编辑按钮 -->
+        <div class="action-buttons">
+          <template v-if="isEditing">
+            <el-button @click="cancelEdit" :disabled="saving">取消</el-button>
+            <el-button type="primary" @click="saveProfile" :loading="saving">保存</el-button>
+          </template>
+          <template v-else>
+            <el-button type="primary" @click="startEdit">
+              <el-icon><Edit /></el-icon>
+              编辑资料
+            </el-button>
+          </template>
         </div>
       </div>
 
@@ -115,15 +245,63 @@ const getProgress = () => {
   margin-bottom: 32px;
 }
 
+.avatar-wrapper {
+  position: relative;
+}
+
 .avatar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-size: 32px;
   color: #fff;
 }
 
+.avatar-wrapper.editing {
+  cursor: pointer;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.avatar-wrapper.editing:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-wrapper.editing .avatar-overlay.is-loading {
+  opacity: 1;
+}
+
+.user-info {
+  flex: 1;
+}
+
 .user-info h2 {
   font-size: 24px;
   margin-bottom: 8px;
+}
+
+.nickname-input {
+  margin-bottom: 8px;
+}
+
+.username-hint {
+  color: #909399;
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .stats-grid {

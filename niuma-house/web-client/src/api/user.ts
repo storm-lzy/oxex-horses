@@ -3,6 +3,8 @@ import request from '@/utils/request'
 export interface User {
     id: number
     username: string
+    nickname: string
+    avatar: string
     occupation_id: number
     occupation?: { id: number; name: string }
     level: number
@@ -28,6 +30,12 @@ export interface LoginResponse {
     user: User
 }
 
+export interface UpdateProfileRequest {
+    nickname?: string
+    avatar?: string
+    occupation_id?: number
+}
+
 // 登录
 export const login = (data: LoginRequest): Promise<LoginResponse> => {
     return request.post('/auth/login', data)
@@ -44,11 +52,16 @@ export const getProfile = (): Promise<User> => {
 }
 
 // 更新用户资料
-export const updateProfile = (data: { occupation_id: number }): Promise<void> => {
+export const updateProfile = (data: UpdateProfileRequest): Promise<void> => {
     return request.put('/user/profile', data)
 }
 
 // 获取职业列表
 export const getOccupations = (): Promise<{ id: number; name: string }[]> => {
     return request.get('/occupations')
+}
+
+// 获取头像上传预签名 URL
+export const getAvatarUploadUrl = (filename: string): Promise<{ upload_url: string; access_url: string; object_key: string }> => {
+    return request.post('/user/avatar', { filename })
 }

@@ -61,15 +61,13 @@ func GetProfile(c *gin.Context) {
 func UpdateProfile(c *gin.Context) {
 	userID := middleware.GetCurrentUserID(c)
 
-	var req struct {
-		OccupationID uint `json:"occupation_id"`
-	}
+	var req service.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Fail(c, response.CodeInvalidParams, "参数错误")
 		return
 	}
 
-	if err := GetUserService().UpdateProfile(userID, req.OccupationID); err != nil {
+	if err := GetUserService().UpdateProfile(userID, &req); err != nil {
 		response.Fail(c, response.CodeServerError, err.Error())
 		return
 	}

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPost, likePost, unlikePost, favoritePost, unfavoritePost, getComments, createComment, type Post } from '@/api/post'
+import type { User } from '@/api/user'
 import { useUserStore } from '@/stores/user'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
@@ -92,9 +93,11 @@ const formatDate = (date: string) => {
       <div class="post-card">
         <div class="post-header">
           <div class="author-info">
-            <el-avatar :size="48">{{ post.user?.username?.charAt(0) }}</el-avatar>
+            <el-avatar :size="48" :src="post.user?.avatar || undefined">
+              {{ (post.user?.nickname || post.user?.username)?.charAt(0) }}
+            </el-avatar>
             <div class="author-detail">
-              <span class="author-name">{{ post.user?.username }}</span>
+              <span class="author-name">{{ post.user?.nickname || post.user?.username }}</span>
               <span :class="['level-badge', `level-${post.user?.level}`]">
                 Lv.{{ post.user?.level }}
               </span>

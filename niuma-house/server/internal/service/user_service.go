@@ -55,6 +55,7 @@ func (s *UserService) Register(req *RegisterRequest) (*model.User, error) {
 	// 创建用户
 	user := &model.User{
 		Username:     req.Username,
+		Nickname:     req.Username, // 默认昵称等于用户名
 		Password:     req.Password,
 		OccupationID: req.OccupationID,
 		Level:        1,
@@ -117,14 +118,30 @@ func (s *UserService) GetProfile(userID uint) (*model.User, error) {
 	return user, nil
 }
 
+// UpdateProfileRequest 更新资料请求
+type UpdateProfileRequest struct {
+	Nickname     *string `json:"nickname"`
+	Avatar       *string `json:"avatar"`
+	OccupationID *uint   `json:"occupation_id"`
+}
+
 // UpdateProfile 更新用户资料
-func (s *UserService) UpdateProfile(userID uint, occupationID uint) error {
+func (s *UserService) UpdateProfile(userID uint, req *UpdateProfileRequest) error {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return err
 	}
 
-	user.OccupationID = occupationID
+	if req.Nickname != nil && *req.Nickname != "" {
+		user.Nickname = *req.Nickname
+	}
+	if req.Avatar != nil {
+		user.Avatar = *req.Avatar
+	}
+	if req.OccupationID != nil && *req.OccupationID > 0 {
+		user.OccupationID = *req.OccupationID
+	}
+
 	return s.userRepo.Update(user)
 }
 

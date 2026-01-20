@@ -11,7 +11,7 @@ const userStore = useUserStore()
 // 会话列表
 const conversations = ref<Conversation[]>([])
 // 当前选中的用户
-const selectedUser = ref<{ id: number; username: string } | null>(null)
+const selectedUser = ref<{ id: number; username: string; nickname?: string; avatar?: string } | null>(null)
 // 消息列表
 const messages = ref<Message[]>([])
 // 新消息输入
@@ -62,7 +62,7 @@ const fetchConversations = async () => {
 }
 
 // 选择用户开始聊天
-const selectUser = async (user: { id: number; username: string }) => {
+const selectUser = async (user: { id: number; username: string; nickname?: string; avatar?: string }) => {
   selectedUser.value = user
   await fetchMessages()
   await markAsRead(user.id)
@@ -215,10 +215,12 @@ const isOwnMessage = (msg: Message) => {
           :class="['conversation-item', { active: selectedUser?.id === conv.user.id }]"
           @click="selectUser(conv.user)"
         >
-          <el-avatar :size="40">{{ conv.user.username.charAt(0) }}</el-avatar>
+          <el-avatar :size="40" :src="conv.user.avatar || undefined">
+            {{ (conv.user.nickname || conv.user.username).charAt(0) }}
+          </el-avatar>
           <div class="conversation-info">
             <div class="conversation-header">
-              <span class="conversation-name">{{ conv.user.username }}</span>
+              <span class="conversation-name">{{ conv.user.nickname || conv.user.username }}</span>
               <span v-if="conv.unread_count > 0" class="unread-badge">{{ conv.unread_count }}</span>
             </div>
             <p class="last-message">{{ conv.last_message?.content }}</p>
@@ -232,7 +234,7 @@ const isOwnMessage = (msg: Message) => {
     <div class="messages-main">
       <template v-if="selectedUser">
         <div class="chat-header">
-          <h3>与 {{ selectedUser.username }} 的对话</h3>
+          <h3>与 {{ selectedUser.nickname || selectedUser.username }} 的对话</h3>
         </div>
         <div class="chat-messages" ref="messagesContainer" v-loading="loading">
           <template v-if="messages.length > 0">
@@ -241,15 +243,15 @@ const isOwnMessage = (msg: Message) => {
               :key="msg.id"
               :class="['message-item', { own: isOwnMessage(msg) }]"
             >
-              <el-avatar :size="32" v-if="!isOwnMessage(msg)">
-                {{ selectedUser.username.charAt(0) }}
+              <el-avatar :size="32" v-if="!isOwnMessage(msg)" :src="selectedUser.avatar || undefined">
+                {{ (selectedUser.nickname || selectedUser.username).charAt(0) }}
               </el-avatar>
               <div class="message-bubble">
                 <p class="message-content">{{ msg.content }}</p>
                 <span class="message-time">{{ formatTime(msg.created_at) }}</span>
               </div>
-              <el-avatar :size="32" v-if="isOwnMessage(msg)">
-                {{ userStore.user?.username?.charAt(0) }}
+              <el-avatar :size="32" v-if="isOwnMessage(msg)" :src="userStore.user?.avatar || undefined">
+                {{ (userStore.user?.nickname || userStore.user?.username)?.charAt(0) }}
               </el-avatar>
             </div>
           </template>

@@ -70,6 +70,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 
 			// 上传
 			protected.POST("/upload/presign", handler.GetPresignedURL)
+			protected.POST("/user/avatar", handler.UploadAvatar)
 
 			// 私信
 			protected.GET("/messages", handler.GetMessages)
