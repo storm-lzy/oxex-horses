@@ -3,10 +3,10 @@ server:
   mode: debug  # debug, release
 
 mysql:
-  host: 119.29.182.41
+  host: 8.148.183.224
   port: 3306
-  username: root
-  password: "123456"
+  username: storm
+  password: 123456
   database: niuma_house
   charset: utf8mb4
   max_idle_conns: 10
