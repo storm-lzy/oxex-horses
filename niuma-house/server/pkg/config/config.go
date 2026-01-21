@@ -41,11 +41,12 @@ type RedisConfig struct {
 }
 
 type MinIOConfig struct {
-	Endpoint  string `mapstructure:"endpoint"`
-	AccessKey string `mapstructure:"access_key"`
-	SecretKey string `mapstructure:"secret_key"`
-	Bucket    string `mapstructure:"bucket"`
-	UseSSL    bool   `mapstructure:"use_ssl"`
+	Endpoint         string `mapstructure:"endpoint"`
+	ExternalEndpoint string `mapstructure:"external_endpoint"`
+	AccessKey        string `mapstructure:"access_key"`
+	SecretKey        string `mapstructure:"secret_key"`
+	Bucket           string `mapstructure:"bucket"`
+	UseSSL           bool   `mapstructure:"use_ssl"`
 }
 
 type RabbitMQConfig struct {

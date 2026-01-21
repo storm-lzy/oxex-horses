@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"log"
+	"net/url"
 	"sync"
 	"time"
 
@@ -13,9 +14,10 @@ import (
 )
 
 var (
-	minioClient *minio.Client
-	bucketName  string
-	once        sync.Once
+	minioClient      *minio.Client
+	bucketName       string
+	externalEndpoint string
+	once             sync.Once
 )
 
 // InitMinIO 初始化 MinIO 客户端
@@ -31,6 +33,7 @@ func InitMinIO(cfg *config.MinIOConfig) *minio.Client {
 		}
 
 		bucketName = cfg.Bucket
+		externalEndpoint = cfg.ExternalEndpoint
 
 		// 确保 bucket 存在
 		ctx := context.Background()
@@ -64,20 +67,33 @@ func GetBucketName() string {
 	return bucketName
 }
 
-// GeneratePresignedPutURL 生成预签名上传 URL
-func GeneratePresignedPutURL(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
-	url, err := minioClient.PresignedPutObject(ctx, bucketName, objectName, expiry)
+// replaceHost 替换 URL 中的 Host 为外部访问地址
+func replaceHost(originalURL string) (string, error) {
+	if externalEndpoint == "" {
+		return originalURL, nil
+	}
+	u, err := url.Parse(originalURL)
 	if err != nil {
 		return "", err
 	}
-	return url.String(), nil
+	u.Host = externalEndpoint
+	return u.String(), nil
+}
+
+// GeneratePresignedPutURL 生成预签名上传 URL
+func GeneratePresignedPutURL(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
+	u, err := minioClient.PresignedPutObject(ctx, bucketName, objectName, expiry)
+	if err != nil {
+		return "", err
+	}
+	return replaceHost(u.String())
 }
 
 // GeneratePresignedGetURL 生成预签名下载 URL
 func GeneratePresignedGetURL(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
-	url, err := minioClient.PresignedGetObject(ctx, bucketName, objectName, expiry, nil)
+	u, err := minioClient.PresignedGetObject(ctx, bucketName, objectName, expiry, nil)
 	if err != nil {
 		return "", err
 	}
-	return url.String(), nil
+	return replaceHost(u.String())
 }
