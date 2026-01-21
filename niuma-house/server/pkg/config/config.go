@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -77,6 +78,10 @@ func LoadConfig(path string) *Config {
 	once.Do(func() {
 		viper.SetConfigFile(path)
 		viper.SetConfigType("yaml")
+
+		// 允许环境变量覆盖 (例如 MINIO_EXTERNAL_ENDPOINT -> minio.external_endpoint)
+		viper.AutomaticEnv()
+		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 		if err := viper.ReadInConfig(); err != nil {
 			log.Fatalf("Failed to read config file: %v", err)

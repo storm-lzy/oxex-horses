@@ -49,7 +49,7 @@ func InitMinIO(cfg *config.MinIOConfig) *minio.Client {
 			log.Printf("Bucket '%s' created successfully", bucketName)
 		}
 
-		log.Println("MinIO connected successfully")
+		log.Printf("MinIO connected. ExternalEndpoint: '%s'", externalEndpoint)
 	})
 	return minioClient
 }
