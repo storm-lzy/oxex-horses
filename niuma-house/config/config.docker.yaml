@@ -19,8 +19,8 @@ redis:
   db: 0
 
 minio:
-  endpoint: niuma-minio:9000  # MinIO容器名称，用于后端服务连接
-  external_endpoint: 119.29.182.41:9000  # 外部访问地址，返回给客户端使用
+  endpoint: 8.148.183.224:9000  # MinIO容器名称，用于后端服务连接
+  external_endpoint: 8.148.183.224:9000  # 外部访问地址，返回给客户端使用
   access_key: minioadmin
   secret_key: minioadmin
   bucket: niuma-house

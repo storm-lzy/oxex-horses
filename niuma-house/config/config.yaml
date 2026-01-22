@@ -19,7 +19,7 @@ redis:
   db: 0
 
 minio:
-  endpoint: 127.0.0.1:9000
+  endpoint: 8.148.183.224:9000
   access_key: minioadmin
   secret_key: minioadmin
   bucket: niuma-house

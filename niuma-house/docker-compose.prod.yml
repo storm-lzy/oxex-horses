@@ -23,7 +23,6 @@ services:
     depends_on:
       - redis
       - rabbitmq
-      - minio
     restart: unless-stopped
     deploy:
       resources:
@@ -99,27 +98,3 @@ services:
       resources:
         limits:
           memory: 256M
-
-  # MinIO - 加入 my-rpg-net
-  minio:
-    image: minio/minio:latest
-    container_name: niuma-minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio_data:/data
-    networks:
-      - my-rpg-net
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-
-volumes:
-  minio_data:
